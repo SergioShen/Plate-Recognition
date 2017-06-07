@@ -340,6 +340,7 @@ Mat cut_edge(const Mat & src) {
 	// analyze all blocks
 	bool have_left_edge = false;
 	bool have_right_edge = false;
+	bool have_left_space = false;
 	int mean_height = 0, mean_count = 0;
 
 	sort(pq.begin(), pq.end(), greater<block>());
@@ -398,29 +399,46 @@ Mat cut_edge(const Mat & src) {
 	print_bin_image(udcut_image);
 #endif
 
-	// calculate col sum
+	// calculate row & column sum
+	memset(row_sum, 0, sizeof(row_sum));
 	for (int i = 0; i < udcut_image.rows; i++) {
 		for (int j = 0; j < udcut_image.cols; j++) {
+			row_sum[i] += udcut_image.at<int>(i, j);
 			col_sum[j] += udcut_image.at<int>(i, j);
 		}
 	}
 
+	if (col_sum[0] < udcut_image.rows / 4)
+		have_left_space = true;
+
+	for (int i = 0; i < 5; i++) {
+		if (col_sum[i] > 0.8 * udcut_image.rows)
+			have_left_edge = true;
+	}
+
+	for (int i = udcut_image.cols - 5; i < udcut_image.cols; i++) {
+		if (col_sum[i] > 0.8 * udcut_image.rows)
+			have_right_edge = true;
+	}
+
 	int left = 0, right = udcut_image.cols;
-	if (have_left_edge) { // need to cut left and right bound
-		while (col_sum[left] < 5)
+	if (have_left_space) {
+		while (col_sum[left] < src.rows / 4)
 			left++;
-		while (col_sum[left] >= 5)
+	}
+	if (have_left_edge) {
+		while (col_sum[left] < src.rows / 4)
 			left++;
-		while (col_sum[left] < 5)
+		while (col_sum[left] >= src.rows / 4)
+			left++;
+		while (col_sum[left] < src.rows / 4)
 			left++;
 	}
 	if (have_right_edge) {
 		right--;
-		while (col_sum[right] < 5)
+		while (col_sum[right] < src.rows / 4)
 			right--;
-		while (col_sum[right] >= 5)
-			right--;
-		while (col_sum[right] < 5)
+		while (col_sum[right] >= src.rows / 4)
 			right--;
 		right++;
 	}
@@ -436,10 +454,9 @@ Mat cut_edge(const Mat & src) {
 	print_bin_image(dual_cut_image);
 #endif
 
-	memset(row_sum, 0, sizeof(row_sum));
-
 	// second cut of up & down
 	// calculate row sum
+	memset(row_sum, 0, sizeof(row_sum));
 	for (int i = 0; i < dual_cut_image.rows; i++) {
 		for (int j = 0; j < dual_cut_image.cols; j++) {
 			row_sum[i] += dual_cut_image.at<int>(i, j);
