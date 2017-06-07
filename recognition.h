@@ -31,6 +31,9 @@ plate_t plate_dfs_cut_recognition(const Mat &src);
 // cut by analysing the values of every row and cloumn
 plate_t plate_rlt_cut_recognition(const Mat &src);
 
+// cut by cuting edge and df-search
+plate_t plate_edge_cut_dfs_cut_recognition(const Mat &src);
+
 // depth-first-search function
 void dfs(const Mat &src, int x, int y, bool **visited, block &curr_block);
 
