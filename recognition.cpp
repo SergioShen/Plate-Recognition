@@ -309,10 +309,67 @@ Mat cut_edge(const Mat & src) {
 	int row_sum[PLT_HEIGHT], col_sum[PLT_WIDTH];
 	memset(row_sum, 0, sizeof(row_sum));
 	memset(col_sum, 0, sizeof(col_sum));
+	bool **visited;
 
 #ifdef DEBUG
 	print_bin_image(src);
 #endif
+
+	// build @visited array
+	visited = new bool*[src.rows];
+	for (int i = 0; i < src.rows; i++) {
+		visited[i] = new bool[src.cols];
+		memset(visited[i], 0, src.cols * sizeof(bool));
+	}
+
+	// dfs to detect edge
+	vector<block> pq;
+	for (int i = 0; i < src.rows; i++) {
+		for (int j = 0; j < src.cols; j++) {
+			if (src.at<int>(i, j) > 0 && !visited[i][j]) {
+				block new_block(i, i, j, j);
+				dfs(src, i, j, visited, new_block);
+
+				// filter invalid blocks roughly
+				if (new_block.ymin < 12 || new_block.width() < new_block.height())
+					pq.push_back(new_block);
+			}
+		}
+	}
+
+	// analyze all blocks
+	bool have_left_edge = false;
+	bool have_right_edge = false;
+	int mean_height = 0, mean_count = 0;
+
+	sort(pq.begin(), pq.end(), greater<block>());
+
+	for (vector<block>::iterator it = pq.begin(); it != pq.end(); it++) {
+		block temp = *it;
+		if (temp.height() >= src.rows / 2) {
+			mean_count++;
+			mean_height += temp.height();
+		}
+	}
+	mean_height /= mean_count;
+
+	for (vector<block>::iterator it = pq.begin(); it != pq.end(); it++) {
+		block temp = *it;
+
+		// edge identify
+		if (temp.size() > src.cols * src.rows / 4) {
+			if (temp.ymin < 5)
+				have_left_edge = true;
+			if (temp.ymax >= src.cols - 5)
+				have_right_edge = true;
+		}
+		if (temp.height() > 1.1 * mean_height) {
+			if (temp.ymin < 5)
+				have_left_edge = true;
+			if (temp.ymax >= src.cols - 5)
+				have_right_edge = true;
+		}
+	}
 
 	// calculate row sum
 	for (int i = 0; i < src.rows; i++) {
@@ -348,25 +405,16 @@ Mat cut_edge(const Mat & src) {
 		}
 	}
 
-	// cut left & right
-	int block_cnt = 0;
-	for (int j = 0; j < udcut_image.cols; j++) {
-		if (col_sum[j] >= 5) {
-			block_cnt++;
-			while (j < udcut_image.cols - 1 && col_sum[j] >= 5)
-				j++;
-		}
-	}
-
 	int left = 0, right = udcut_image.cols;
-	if (block_cnt > 8) { // need to cut left and right bound
+	if (have_left_edge) { // need to cut left and right bound
 		while (col_sum[left] < 5)
 			left++;
 		while (col_sum[left] >= 5)
 			left++;
 		while (col_sum[left] < 5)
 			left++;
-
+	}
+	if (have_right_edge) {
 		right--;
 		while (col_sum[right] < 5)
 			right--;
@@ -375,13 +423,13 @@ Mat cut_edge(const Mat & src) {
 		while (col_sum[right] < 5)
 			right--;
 		right++;
-
-		// cut safety check
-		if (left >= 8)
-			left = 0;
-		if (udcut_image.cols - right >= 8)
-			right = udcut_image.cols;
 	}
+
+	// cut safety check
+	if (left > 15)
+		left = 0;
+	if (udcut_image.cols - right >= 15)
+		right = udcut_image.cols;
 	Mat dual_cut_image = udcut_image(Range(0, udcut_image.rows), Range(left, right));
 
 #ifdef DEBUG
@@ -420,3 +468,4 @@ Mat cut_edge(const Mat & src) {
 
 	return full_cut_image;
 }
+
