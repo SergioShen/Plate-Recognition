@@ -25,6 +25,9 @@ Mat scr_image_pre_process(const Mat &src);
 // convert to standard, float-valued, i-d array
 Mat cnr_image_pre_process(const Mat &src);
 
+// cut by depth-first-search to find joint-blocks
+plate_t plate_dfs_cut_recognition(const Mat &src);
+
 // cut by analysing the values of every row and cloumn
 plate_t plate_rlt_cut_recognition(const Mat &src);
 
