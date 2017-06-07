@@ -278,6 +278,11 @@ plate_t plate_rlt_cut_recognition(const Mat &src) {
 	return result;
 }
 
+plate_t plate_edge_cut_dfs_cut_recognition(const Mat & src) {
+	Mat full_cut_image = cut_edge(src);
+	return plate_dfs_cut_recognition(full_cut_image);
+}
+
 void dfs(const Mat & src, int x, int y, bool **visited, block & curr_block) {
 	if (x < curr_block.xmin)
 		curr_block.xmin = x;
