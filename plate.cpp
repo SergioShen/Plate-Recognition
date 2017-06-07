@@ -38,7 +38,7 @@ void init_global_data() {
 	cnr_code2label[12] = "鄂"; cnr_code2label[13] = "湘";
 	cnr_code2label[14] = "苏"; cnr_code2label[15] = "赣";
 	cnr_code2label[16] = "吉"; cnr_code2label[17] = "辽";
-	cnr_code2label[18] = "内"; cnr_code2label[19] = "宁";
+	cnr_code2label[18] = "蒙"; cnr_code2label[19] = "宁";
 	cnr_code2label[20] = "青"; cnr_code2label[21] = "鲁";
 	cnr_code2label[22] = "沪"; cnr_code2label[23] = "陕";
 	cnr_code2label[24] = "晋"; cnr_code2label[25] = "川";
@@ -120,7 +120,12 @@ bool pos_less(const block & a, const block & b) {
 	return a.ymin < b.ymin;
 }
 
-block::block(int x1, int x2, int y1, int y2) { }
+block::block(int x1, int x2, int y1, int y2) {
+	xmin = x1;
+	xmax = x2;
+	ymin = y1;
+	ymax = y2;
+}
 
 int block::width() const {
 	return ymax - ymin + 1;
