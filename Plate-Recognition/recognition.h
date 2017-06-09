@@ -26,13 +26,13 @@ Mat scr_image_pre_process(const Mat &src);
 Mat cnr_image_pre_process(const Mat &src);
 
 // cut by depth-first-search to find joint-blocks
-plate_t plate_dfs_cut_recognition(const Mat &src);
+plate_t plate_dfs_cut_recognition(const Mat &src, string file_name);
 
 // cut by analysing the values of every row and cloumn
-plate_t plate_rlt_cut_recognition(const Mat &src);
+plate_t plate_rlt_cut_recognition(const Mat &src, string file_name);
 
 // cut by cuting edge and df-search
-plate_t plate_edge_cut_dfs_cut_recognition(const Mat &src);
+plate_t plate_edge_cut_dfs_cut_recognition(const Mat &src, string file_name);
 
 // depth-first-search function
 void dfs(const Mat &src, int x, int y, bool **visited, block &curr_block);
