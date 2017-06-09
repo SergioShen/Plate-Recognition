@@ -7,6 +7,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include<opencv2\opencv.hpp>
 #include<iostream>
+#include<fstream>
 #include<string>
 #include<map>
 #include<set>
@@ -42,11 +43,13 @@ using namespace cv;
 ////////////////////////////////////////////////////////////////////////////////
 extern map<int, char> scr_code2label;
 extern Mat scr_mat_w, scr_mat_b;
-extern float scr_w[SCR_WIDTH * SCR_HEIGHT * SCR_OUTPUTSIZE], scr_b[SCR_OUTPUTSIZE];
+extern float scr_w[SCR_WIDTH * SCR_HEIGHT * SCR_OUTPUTSIZE],
+	scr_b[SCR_OUTPUTSIZE];
 
 extern map<int, string> cnr_code2label;
 extern Mat cnr_mat_w, cnr_mat_b;
-extern float cnr_w[CNR_WIDTH * CNR_HEIGHT * CNR_OUTPUTSIZE], cnr_b[CNR_OUTPUTSIZE];
+extern float cnr_w[CNR_WIDTH * CNR_HEIGHT * CNR_OUTPUTSIZE],
+	cnr_b[CNR_OUTPUTSIZE];
 
 
 ////////////////////////////////////////////////////////////////////////////////
