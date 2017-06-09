@@ -55,7 +55,7 @@ Mat cnr_image_pre_process(const Mat & src) {
 	return result;
 }
 
-plate_t plate_dfs_cut_recognition(const Mat & src) {
+plate_t plate_dfs_cut_recognition(const Mat & src, string file_name) {
 	plate_t result;
 	bool **visited;
 
@@ -79,7 +79,8 @@ plate_t plate_dfs_cut_recognition(const Mat & src) {
 				dfs(src, i, j, visited, new_block);
 
 				// filter invalid blocks roughly
-				if (new_block.ymin < 12 || new_block.width() < new_block.height())
+				if (new_block.ymin < 12 
+					|| new_block.width() < new_block.height())
 					pq.push_back(new_block);
 			}
 		}
@@ -120,7 +121,8 @@ plate_t plate_dfs_cut_recognition(const Mat & src) {
 	// recognition
 	for (int i = 0; i < 7; i++) {
 		if (i == 0) {
-			int xmin = blks[i].xmin, xmax = blks[i].xmax, ymin = blks[i].ymin, ymax = blks[i].ymax;
+			int xmin = blks[i].xmin, xmax = blks[i].xmax,
+				ymin = blks[i].ymin, ymax = blks[i].ymax;
 			int *row_sum = new int[src.rows], *col_sum = new int[src.cols];
 			memset(row_sum, 0, sizeof(int) * src.rows);
 			memset(col_sum, 0, sizeof(int) * src.cols);
@@ -137,7 +139,8 @@ plate_t plate_dfs_cut_recognition(const Mat & src) {
 			if (have_edge) {
 				if (edge.ymin <= 2) {
 					ymin = edge.ymin;
-					while (ymin < ymax / 2 && 4 * col_sum[ymin + 1] > col_sum[ymin])
+					while (ymin < ymax / 2
+						&& 4 * col_sum[ymin + 1] > col_sum[ymin])
 						ymin++;
 					ymin += 2;
 				}
@@ -165,20 +168,23 @@ plate_t plate_dfs_cut_recognition(const Mat & src) {
 			}
 
 #ifdef DEBUG
-			print_bin_image(src(Range(blks[i].xmin, blks[i].xmax + 1), Range(blks[i].ymin, blks[i].ymax + 1)));
+			print_bin_image(src(Range(blks[i].xmin, blks[i].xmax + 1),
+				Range(blks[i].ymin, blks[i].ymax + 1)));
 #endif
 
 			if (i == 1) {
 				result.city = scr_code2label[
 					scr_recognition(
 						scr_image_pre_process(
-							src(Range(blks[i].xmin, blks[i].xmax + 1), Range(blks[i].ymin, blks[i].ymax + 1))))];
+							src(Range(blks[i].xmin, blks[i].xmax + 1),
+								Range(blks[i].ymin, blks[i].ymax + 1))))];
 			}
 			else {
 				result.code[i - 2] = scr_code2label[
 					scr_recognition(
 						scr_image_pre_process(
-							src(Range(blks[i].xmin, blks[i].xmax + 1), Range(blks[i].ymin, blks[i].ymax + 1))))];
+							src(Range(blks[i].xmin, blks[i].xmax + 1),
+								Range(blks[i].ymin, blks[i].ymax + 1))))];
 			}
 		}
 	}
@@ -186,7 +192,7 @@ plate_t plate_dfs_cut_recognition(const Mat & src) {
 	return result;
 }
 
-plate_t plate_rlt_cut_recognition(const Mat &src) {
+plate_t plate_rlt_cut_recognition(const Mat &src, string file_name) {
 	plate_t result;
 	
 	Mat full_cut_image = cut_edge(src);
@@ -248,26 +254,30 @@ plate_t plate_rlt_cut_recognition(const Mat &src) {
 
 #ifdef DEBUG
 		cout << "Block" << currcode << ": " << left << " " << right << endl;
-		print_bin_image(full_cut_image(Range(0, full_cut_image.rows), Range(left, right)));
+		print_bin_image(full_cut_image(Range(0, full_cut_image.rows),
+			Range(left, right)));
 #endif
 
 		if (currcode == 0) {
 			result.province = cnr_code2label[
 				cnr_recognition(
 					cnr_image_pre_process(
-						full_cut_image(Range(0, full_cut_image.rows), Range(left, right))))];
+						full_cut_image(Range(0, full_cut_image.rows),
+							Range(left, right))))];
 		}
 		else if (currcode == 1) {
 			result.city = scr_code2label[
 				scr_recognition(
 					scr_image_pre_process(
-						full_cut_image(Range(0, full_cut_image.rows), Range(left, right))))];
+						full_cut_image(Range(0, full_cut_image.rows),
+							Range(left, right))))];
 		}
 		else {
 			result.code[currcode - 2] = scr_code2label[
 				scr_recognition(
 					scr_image_pre_process(
-						full_cut_image(Range(0, full_cut_image.rows), Range(left, right))))];
+						full_cut_image(Range(0, full_cut_image.rows),
+							Range(left, right))))];
 		}
 		currcode++;
 		j1 = j2;
@@ -278,9 +288,9 @@ plate_t plate_rlt_cut_recognition(const Mat &src) {
 	return result;
 }
 
-plate_t plate_edge_cut_dfs_cut_recognition(const Mat & src) {
+plate_t plate_edge_cut_dfs_cut_recognition(const Mat & src, string file_name) {
 	Mat full_cut_image = cut_edge(src);
-	return plate_dfs_cut_recognition(full_cut_image);
+	return plate_dfs_cut_recognition(full_cut_image, file_name);
 }
 
 void dfs(const Mat & src, int x, int y, bool **visited, block & curr_block) {
@@ -331,7 +341,8 @@ Mat cut_edge(const Mat & src) {
 				dfs(src, i, j, visited, new_block);
 
 				// filter invalid blocks roughly
-				if (new_block.ymin < 12 || new_block.width() < new_block.height())
+				if (new_block.ymin < 12
+					|| new_block.width() < new_block.height())
 					pq.push_back(new_block);
 			}
 		}
@@ -448,7 +459,8 @@ Mat cut_edge(const Mat & src) {
 		left = 0;
 	if (udcut_image.cols - right >= 15)
 		right = udcut_image.cols;
-	Mat dual_cut_image = udcut_image(Range(0, udcut_image.rows), Range(left, right));
+	Mat dual_cut_image = udcut_image(Range(0, udcut_image.rows),
+		Range(left, right));
 
 #ifdef DEBUG
 	print_bin_image(dual_cut_image);
@@ -477,7 +489,8 @@ Mat cut_edge(const Mat & src) {
 		down = dual_cut_image.rows;
 	}
 
-	Mat full_cut_image = dual_cut_image(Range(up, down), Range(0, dual_cut_image.cols));
+	Mat full_cut_image = dual_cut_image(Range(up, down),
+		Range(0, dual_cut_image.cols));
 
 #ifdef DEBUG
 	print_bin_image(full_cut_image);
@@ -485,4 +498,3 @@ Mat cut_edge(const Mat & src) {
 
 	return full_cut_image;
 }
-
