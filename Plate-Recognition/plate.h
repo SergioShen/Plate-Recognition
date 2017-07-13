@@ -89,6 +89,7 @@ public:
 
 //
 // The definition of class block_t
+//
 class block {
 public:
 	int xmin, xmax, ymin, ymax;
